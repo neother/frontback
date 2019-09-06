@@ -1,42 +1,58 @@
 import React, { Component } from 'react'
 import Record from './Record'
-
+import {getJSON} from 'jquery'
 class Records extends Component {
 
   constructor() {
     super();
     this.state = {
-      records:[
-        {"id":1, "date": "2018-01-19","title":'inp1ut',"amount":20},
-        {"id":2, "date": "2018-01-29","title":'inpu2t',"amount":30}
-      ]
+      error: null,
+      isLoaded: false,
+      records: []
     }
   }
+  componentDidMount() {
 
-
-  render() {
-    return (
-      <div>
-        <h2>Records</h2>
-        <table className='table table-bordered'>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Titil</th>
-              <th>Amout</th>
-            </tr>
-          </thead>
-          <tbody>
-          {this.state.records.map((record)=><Record record = {record}/>)}
-          </tbody>
-
-        </table>
-      </div>
-
+    getJSON("http://localhost:3004/posts").then(
+      response => this.setState({
+        records: response,
+        isLoaded: true
+      }),
+      error => this.setState({
+        isLoaded: true,
+        error
+      })
     )
+  }
+  render() {
+    const { error, isLoaded, records } = this.state;
 
+    if (error) {
+      return <div>Error:{error.responseText}</div>;
+    }
+    else if (!isLoaded) {
+      return <div>Loading.......</div>;
+    }
+    else {
+      return (
+        <div>
+          <h2>Records</h2>
+          <table className='table table-bordered'>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Titil</th>
+                <th>Amout</th>
+              </tr>
+            </thead>
+            <tbody>
+              {this.state.records.map((record) => <Record key={record.id} {...record} />)}
+            </tbody>
 
-
+          </table>
+        </div>
+      )
+    }
   }
 }
 export default Records
